@@ -1,17 +1,29 @@
 const express = require("express");
+const path = require("path");
+const fs = require("fs");
+
 const app = express();
-const port = 3000;
+const PORT = 4000;
 
-const dataArray = [
-  { id: 1, name: "Object 1", description: "Description for Object 1" },
-  { id: 2, name: "Object 2", description: "Description for Object 2" },
-  { id: 3, name: "Object 3", description: "Description for Object 3" },
-];
+const imagesDirectory = path.join(__dirname, "images");
 
-app.get("/api/objects", (req, res) => {
-  res.json(dataArray);
+app.listen(PORT, () => {
+  console.log(`API listening on PORT ${PORT}`);
 });
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+app.get("/", (req, res) => {
+  res.send("Hey, this is my Image API 📷");
 });
+
+app.get("/api/random-image", (req, res) => {
+  fs.readdir(imagesDirectory, (err, files) => {
+    if (err) {
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    const randomImage = files[Math.floor(Math.random() * files.length)];
+    const imagePath = path.join(imagesDirectory, randomImage);
+    res.sendFile(imagePath);
+  });
+});
+
+module.exports = app;
